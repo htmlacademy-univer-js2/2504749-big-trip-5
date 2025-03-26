@@ -19,14 +19,6 @@ const createSortTemplate = (sort) => `
 `;
 
 export default class SortView extends AbstractView {
-  #sort = null;
 
-  constructor(sort) {
-    super();
-    this.#sort = sort;
-  }
-
-  get template() {
-    return createSortTemplate(this.#sort);
   }
 }

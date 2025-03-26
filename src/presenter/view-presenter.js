@@ -5,11 +5,7 @@ import CreateEditEventView from '../view/create-form-view.js';
 import RoutePointView from '../view/route-point-view.js';
 import EventList from '../view/list-view.js';
 import RoutePointsModel from '../model/point-model.js';
-import ListMessageView from '../view/empty-list-message-view.js';
-import { isEscapeKey } from '../utils.js';
-import { generateFilters } from '../mock/filter-data.js';
-import { messages } from '../mock/message-data.js';
-import { generateSort } from '../mock/sort-data.js';
+
 
 
 export default class TripPresenter {
@@ -43,26 +39,23 @@ export default class TripPresenter {
   }
 
   #renderRoutePoint(routePoint) {
-    const onEscKeyDown = (evt) => {
-      if (isEscapeKey(evt)) {
-        replaceEditPointToPoint();
-        document.removeEventListener('keydown', onEscKeyDown);
+
       }
     };
 
     const onOpenEditButtonClick = () => {
       replacePointToEditPoint();
-      document.addEventListener('keydown', onEscKeyDown);
+
     };
 
     const onCloseEditButtonClick = () => {
       replaceEditPointToPoint();
-      document.removeEventListener('keydown', onEscKeyDown);
+
     };
 
     const onSubmitButtonClick = () => {
       replaceEditPointToPoint();
-      document.removeEventListener('keydown', onEscKeyDown);
+
     };
 
     const point = new RoutePointView(routePoint, onOpenEditButtonClick);
