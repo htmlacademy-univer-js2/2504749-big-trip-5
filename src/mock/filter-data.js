@@ -7,6 +7,7 @@ const FilterType = {
   PAST: 'past'
 };
 
+
 const filter = {
   [FilterType.EVERYTHING]: (points) => points,
   [FilterType.FUTURE]: (points) => points.filter((point) => isFuturePoint(point)),
