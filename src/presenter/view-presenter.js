@@ -8,6 +8,7 @@ import RoutePointsModel from '../model/point-model.js';
 import { isEscapeKey } from '../utils.js';
 
 
+
 export default class TripPresenter {
   constructor() {
     this.eventsListContainer = new EventList;
