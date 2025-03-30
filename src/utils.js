@@ -45,3 +45,25 @@ const formatDateToCustomFormat = (date) => {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
+const isEscapeKey = ({ key }) => key === 'Escape';
+
+const isFuturePoint = (point) => dayjs().isBefore(point.dateFrom, 'minute');
+
+const isPresentPoint = (point) => dayjs().isAfter(point.dateFrom, 'minute') && dayjs().isBefore(point.dateTo, 'minute');
+
+const isPastPoint = (point) => dayjs().isAfter(point.dateTo, 'minute');
+
+const updatePoint = (points, updatedPoint) => points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
+
+export {
+  formatDate,
+  formatTime,
+  formatDatetime,
+  calculateDuration,
+  formatDateToCustomFormat,
+  isEscapeKey,
+  isFuturePoint,
+  isPresentPoint,
+  isPastPoint,
+  updatePoint
+};

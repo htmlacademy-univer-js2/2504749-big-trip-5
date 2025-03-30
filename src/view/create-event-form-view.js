@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { formatDateToCustomFormat } from '../utils.js';
-
+import { offersByType, destinations } from '../mock/mock-route-data.js';
 
 const createEventFormTemplate = (routePoint) => {
   const { dateFrom, dateTo, type, city, availableOfferIds, selectedOfferIds, destinationId } = routePoint;
@@ -88,6 +88,34 @@ const createEventFormTemplate = (routePoint) => {
                 </div>
               </fieldset>
             </div>
+          </div>
+
+          <div class="event__field-group event__field-group--destination">
+            <label class="event__label event__type-output" for="event-destination-1">
+              ${type || 'choose type'}
+            </label>
+            <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city || ''}" placeholder="choose city" list="destination-list-1">
+            <datalist id="destination-list-1">
+              <option value="Amsterdam"></option>
+              <option value="Geneva"></option>
+              <option value="Chamonix"></option>
+            </datalist>
+          </div>
+
+          <div class="event__field-group event__field-group--time">
+            <label class="visually-hidden" for="event-start-time-1">From</label>
+            <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTime}" placeholder="start time">
+            &mdash;
+            <label class="visually-hidden" for="event-end-time-1">To</label>
+            <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTime}" placeholder="end time">
+          </div>
+
+          <div class="event__field-group event__field-group--price">
+            <label class="event__label" for="event-price-1">
+              <span class="visually-hidden">Price</span>
+              &euro;
+            </label>
+            <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price" value="${routePoint.price || ''}" placeholder="price">
           </div>
 
 
