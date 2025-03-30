@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 const formatDate = (date) => {
   const formattedDate = date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
   const [day, month] = formattedDate.split(' ');
@@ -43,6 +45,3 @@ const formatDateToCustomFormat = (date) => {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
-const isEscapeKey = (evt) => evt.key === 'Escape';
-
-export { formatDate, formatTime, formatDatetime, calculateDuration, formatDateToCustomFormat, isEscapeKey };
