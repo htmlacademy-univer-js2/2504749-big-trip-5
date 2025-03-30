@@ -1,4 +1,4 @@
-import { mockRoutePoints } from '../mosk/mosk.js';
+import { mockRoutePoints } from '../mock/mock-route-data.js';
 
 export default class RoutePointsModel {
   routePoints = mockRoutePoints;
