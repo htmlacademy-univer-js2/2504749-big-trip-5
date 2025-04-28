@@ -1,3 +1,3 @@
-import TripPresenter from './presenter/view-presenter.js';
+import TripPresenter from './presenter/trip-presenter.js';
 
 new TripPresenter().init();
