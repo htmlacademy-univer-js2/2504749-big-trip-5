@@ -49,37 +49,6 @@ const formatDateToCustomFormat = (date) => {
 
 const isEscapeKey = ({ key }) => key === 'Escape';
 
-const isFuturePoint = (point) => dayjs().isBefore(point.date_from, 'minute');
-
-const isPresentPoint = (point) => dayjs().isAfter(point.date_from, 'minute') && dayjs().isBefore(point.date_to, 'minute');
-
-const isPastPoint = (point) => dayjs().isAfter(point.date_to, 'minute');
-
-const updatePoint = (points, updatedPoint) => points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
-
-const sortRoutePoints = (points, sortType) => {
-  const sortedPoints = [...points];
-
-  switch (sortType) {
-    case SortType.DAY:
-      return sortedPoints.sort((a, b) => new Date(a.date_from) - new Date(b.date_from));
-    case SortType.TIME:
-      return sortedPoints.sort((a, b) => (new Date(b.date_to) - new Date(b.date_from)) - (new Date(a.date_to) - new Date(a.date_from)));
-    case SortType.PRICE:
-      return sortedPoints.sort((a, b) => b.base_price - a.base_price);
-    default:
-      return sortedPoints;
-  }
-};
-
-const generateRandomId = (length = 8) => {
-  let id = '';
-  for (let i = 0; i < length; i++) {
-    id += Math.floor(Math.random() * 10);
-  }
-  return id;
-};
-
 export {
   formatDate,
   formatTime,
@@ -90,7 +59,5 @@ export {
   isFuturePoint,
   isPresentPoint,
   isPastPoint,
-  updatePoint,
-  sortRoutePoints,
-  generateRandomId
+
 };
