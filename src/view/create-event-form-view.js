@@ -2,6 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { formatDateToCustomFormat } from '../utils.js';
 import { offersByType, destinations } from '../mock/mock-route-data.js';
 
+
 const createEventFormTemplate = (routePoint) => {
   const { base_price: basePrice, date_from: dateFrom, date_to: dateTo, destination, offers, type } = routePoint;
 
@@ -188,6 +189,7 @@ export default class CreateEditEventView extends AbstractStatefulView {
 
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#eventDestinationChangeHandler);
 
+
   }
 
   #closeEditButtonClickHandler = (evt) => {
@@ -217,4 +219,5 @@ export default class CreateEditEventView extends AbstractStatefulView {
       destination: newDestination ? newDestination.id : ''
     });
   };
+
 }
