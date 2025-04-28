@@ -18,4 +18,5 @@ const Mode = {
   EDITING: 'EDITING'
 };
 
+
 export { FilterType, SortType, Mode };
