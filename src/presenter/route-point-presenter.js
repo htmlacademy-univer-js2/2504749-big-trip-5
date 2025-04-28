@@ -24,6 +24,17 @@ export default class RoutePointPresenter {
     this.#renderRoutePoint();
   }
 
+  destroy() {
+    if (this.#point) {
+      this.#point.element.remove();
+      this.#point = null;
+    }
+    if (this.#editPoint) {
+      this.#editPoint.element.remove();
+      this.#editPoint = null;
+    }
+  }
+
   #renderRoutePoint() {
     this.#point = new RoutePointView(
       this.#routePoint,
@@ -45,7 +56,8 @@ export default class RoutePointPresenter {
   }
 
   #onFavoriteClick(routePoint) {
-    routePoint.isFavorite = !routePoint.isFavorite;
+    // eslint-disable-next-line camelcase
+    routePoint.is_favorite = !routePoint.is_favorite;
     this.#onDataChange(routePoint);
     this.#updateRoutePoint();
   }
@@ -72,8 +84,12 @@ export default class RoutePointPresenter {
     document.removeEventListener('keydown', this.#onEscKeyDown);
   };
 
+  #isElementInDOM(element) {
+    return !!element.element.parentElement;
+  }
+
   #replacePointToEditPoint() {
-    if (!this.#point.element.parentElement) {
+    if (!this.#isElementInDOM(this.#point)) {
       return;
     }
 
@@ -83,7 +99,7 @@ export default class RoutePointPresenter {
   }
 
   #replaceEditPointToPoint() {
-    if (!this.#editPoint.element.parentElement) {
+    if (!this.#isElementInDOM(this.#editPoint)) {
       return;
     }
 
