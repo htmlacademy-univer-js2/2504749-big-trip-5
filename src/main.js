@@ -16,6 +16,7 @@ const tripPresenter = new TripPresenter(
   newPointButton
 );
 
+
 const handleNewPointPuttonClick = () => {
   tripPresenter.createPoint();
   newPointButton.disableButton();

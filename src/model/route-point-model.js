@@ -76,6 +76,7 @@ export default class RoutePointsModel extends Observable {
       ...this.#points.slice(index + 1),
     ];
 
+
     this.#sortPointsByDate();
 
     this._notify(updateType, update);

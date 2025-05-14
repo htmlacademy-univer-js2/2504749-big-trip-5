@@ -119,6 +119,7 @@ export default class RoutePointPresenter {
     this.#mode = Mode.DEFAULT;
   }
 
+
   resetPointMode() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#replaceEditPointToPoint();

@@ -200,6 +200,7 @@ export default class TripPresenter {
     }
   };
 
+
   #onDataChange = (userAction, updateType, update) => {
     switch (userAction) {
       case UserAction.UPDATE_POINT:

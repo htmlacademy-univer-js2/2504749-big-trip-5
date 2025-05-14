@@ -18,6 +18,7 @@ const Mode = {
   EDITING: 'EDITING'
 };
 
+
 const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',

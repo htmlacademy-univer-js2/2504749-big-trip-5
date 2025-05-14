@@ -124,6 +124,7 @@ const getTripInfo = (points, destinations, offersByType) => {
   return { title, dates, cost };
 };
 
+
 export {
   formatDate,
   formatTime,

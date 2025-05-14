@@ -1,5 +1,6 @@
 import { generateRandomId } from '../utils';
 
+
 const destinations = [
   {
     'id': generateRandomId(),
