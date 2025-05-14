@@ -10,7 +10,6 @@ const newPointButton = new NewPointButtonPresenter(
   document.querySelector('.trip-main')
 );
 
-
 const tripPresenter = new TripPresenter(
   routePointsModel,
   filterModel,
@@ -27,6 +26,7 @@ new FilterPresenter(
   filterModel,
   routePointsModel
 ).init();
+
 
 newPointButton.init(handleNewPointPuttonClick);
 tripPresenter.init();

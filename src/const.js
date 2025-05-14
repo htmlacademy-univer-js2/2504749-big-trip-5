@@ -52,4 +52,5 @@ const EmptyPoint = {
   'type': 'flight'
 };
 
+
 export { FilterType, SortType, Mode, UpdateType, UserAction, EmptyListMessage, FormType, EmptyPoint };
