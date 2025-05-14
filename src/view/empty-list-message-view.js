@@ -10,6 +10,7 @@ export default class ListMessageView extends AbstractView {
     this.#message = message;
   }
 
+
   get template() {
     return createEmptyListMessageTemplate(this.#message);
   }
