@@ -1,10 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { formatDateToCustomFormat } from '../utils.js';
-import { FormType, UpdateType, UserAction } from '../const.js';
-import flatpickr from 'flatpickr';
-import '../../node_modules/flatpickr/dist/flatpickr.css';
+import { offersByType, destinations } from '../mock/mock-route-data.js';
 
-const createEventFormTemplate = (routePoint, destinations, offersByType, formType) => {
+const createEventFormTemplate = (routePoint) => {
   const { base_price: basePrice, date_from: dateFrom, date_to: dateTo, destination, offers, type } = routePoint;
 
   const startTime = dateFrom ? formatDateToCustomFormat(dateFrom) : '';
@@ -99,7 +97,16 @@ const createEventFormTemplate = (routePoint, destinations, offersByType, formTyp
             </label>
             <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city || ''}" placeholder="choose city" list="destination-list-1">
             <datalist id="destination-list-1">
-              ${destinations.map((dest) => `<option value="${dest.name}"></option>`).join('')}</datalist>
+              <option value="Barcelona"></option>
+              <option value="Tokyo"></option>
+              <option value="New York"></option>
+              <option value="Sydney"></option>
+              <option value="Paris"></option>
+              <option value="Rome"></option>
+              <option value="London"></option>
+              <option value="Berlin"></option>
+              <option value="Amsterdam"></option>
+            </datalist>
           </div>
 
           <div class="event__field-group event__field-group--time">
@@ -115,19 +122,15 @@ const createEventFormTemplate = (routePoint, destinations, offersByType, formTyp
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice || ''}" placeholder="price">
+            <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice || ''}" placeholder="price">
           </div>
 
-          ${formType === FormType.CREATE ? `
-            <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-            <button class="event__reset-btn" type="reset">Cancel</button>
-          ` : `
-            <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-            <button class="event__reset-btn" type="reset">Delete</button>
-            <button class="event__rollup-btn" type="button">
-              <span class="visually-hidden">Open event</span>
-            </button>
-          `}
+
+          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+          <button class="event__reset-btn" type="reset">Delete</button>
+          <button class="event__rollup-btn" type="button">
+            <span class="visually-hidden">Open event</span>
+          </button>
         </header>
         <section class="event__details">
           ${offerItems ? `
@@ -160,38 +163,24 @@ const createEventFormTemplate = (routePoint, destinations, offersByType, formTyp
 export default class CreateEditEventView extends AbstractStatefulView {
   #onCloseEditButtonClick = null;
   #onSubmitButtonClick = null;
-  #onDataChange = null;
-  #formType = null;
-  #destinations = null;
-  #offersByType = null;
 
-  constructor(routePoint, destinations, offers, onCloseEditButtonClick, onSubmitButtonClick, onDataChange, formType) {
+  constructor(routePoint, onCloseEditButtonClick, onSubmitButtonClick) {
     super();
     this._state = { ...routePoint };
     this.#onCloseEditButtonClick = onCloseEditButtonClick;
     this.#onSubmitButtonClick = onSubmitButtonClick;
-    this.#onDataChange = onDataChange;
-    this.#formType = formType;
-
-    this.#destinations = destinations;
-    this.#offersByType = offers;
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createEventFormTemplate(this._state, this.#destinations, this.#offersByType, this.#formType);
+    return createEventFormTemplate(this._state);
   }
 
   _restoreHandlers() {
-    this.element.querySelector('.event__save-btn').addEventListener('click', this.#submitButtonClickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeEditButtonClickHandler);
 
-    if (this.#formType === FormType.EDIT) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeEditButtonClickHandler);
-      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteButtonClickHandler);
-    } else {
-      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#closeEditButtonClickHandler);
-    }
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#submitButtonClickHandler);
 
     this.element.querySelectorAll('.event__type-input').forEach((input) => {
       input.addEventListener('change', this.#eventTypeChangeHandler);
@@ -199,38 +188,7 @@ export default class CreateEditEventView extends AbstractStatefulView {
 
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#eventDestinationChangeHandler);
 
-    this.#setDatepickerStart();
-    this.#setDatepickerEnd();
   }
-
-  getUpdatedPoint() {
-    const formElement = this.element.querySelector('form');
-    const formData = new FormData(formElement);
-
-    const selectedType = formData.get('event-type');
-    const selectedDestinationName = formData.get('event-destination');
-    const selectedDestination = this.#destinations.find((dest) => dest.name === selectedDestinationName);
-    const selectedOffers = Array.from(formElement.querySelectorAll('.event__offer-checkbox:checked'))
-      .map((checkbox) => checkbox.id.replace('event-offer-', ''));
-
-    const dateFrom = this._state.date_from ? new Date(this._state.date_from) : null;
-    const dateTo = this._state.date_to ? new Date(this._state.date_to) : null;
-
-    return {
-      ...this._state,
-      'type': selectedType,
-      'destination': selectedDestination?.id || null,
-      'base_price': Number(formData.get('event-price')),
-      'date_from': dateFrom ? dateFrom.toISOString() : null,
-      'date_to': dateTo ? dateTo.toISOString() : null,
-      'offers': selectedOffers,
-    };
-  }
-
-  #deleteButtonClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#onDataChange(UserAction.DELETE_POINT, UpdateType.MINOR, this._state);
-  };
 
   #closeEditButtonClickHandler = (evt) => {
     evt.preventDefault();
@@ -254,38 +212,9 @@ export default class CreateEditEventView extends AbstractStatefulView {
   #eventDestinationChangeHandler = (evt) => {
     evt.preventDefault();
     const targetDestination = evt.target.value.toLowerCase();
-    const newDestination = this.#destinations.find((dest) => dest.name.toLowerCase() === targetDestination);
+    const newDestination = destinations.find((dest) => dest.name.toLowerCase() === targetDestination);
     this.updateElement({
       destination: newDestination ? newDestination.id : ''
     });
   };
-
-  #dateChangeHandler = (type, newDate) => {
-    this._setState({
-      [type]: newDate
-    });
-  };
-
-  #setDatepickerStart() {
-    const startDateInput = this.element.querySelector('#event-start-time-1');
-    flatpickr(startDateInput, {
-      dateFormat: 'd/m/y H:i',
-      enableTime: true,
-      'time_24hr': true,
-      defaultDate: this._state.date_from,
-      onChange: (date) => this.#dateChangeHandler('date_from', date[0])
-    });
-  }
-
-  #setDatepickerEnd() {
-    const endDateInput = this.element.querySelector('#event-end-time-1');
-    flatpickr(endDateInput, {
-      dateFormat: 'd/m/y H:i',
-      enableTime: true,
-      'time_24hr': true,
-      defaultDate: this._state.date_to,
-      onChange: (date) => this.#dateChangeHandler('date_to', date[0]),
-      minDate: this._state.date_from
-    });
-  }
 }
