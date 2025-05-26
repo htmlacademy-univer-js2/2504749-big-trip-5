@@ -21,6 +21,7 @@ const filterPresenter = new FilterPresenter(
   routePointsModel
 );
 
+
 new TripPresenter(
   routePointsModel,
   filterModel,
