@@ -1,12 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { formatDateToCustomFormat } from '../utils.js';
-import { offersByType, destinations } from '../mock/mock-route-data.js';
-import { FormType } from '../const.js';
-import { UpdateType, UserAction } from '../const.js';
+import { FormType, UpdateType, UserAction } from '../const.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.css';
 
-const createEventFormTemplate = (routePoint, formType) => {
+const createEventFormTemplate = (routePoint, destinations, offersByType, formType) => {
   const { base_price: basePrice, date_from: dateFrom, date_to: dateTo, destination, offers, type } = routePoint;
 
   const startTime = dateFrom ? formatDateToCustomFormat(dateFrom) : '';
@@ -66,7 +64,6 @@ const createEventFormTemplate = (routePoint, formType) => {
                   <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
                 </div>
 
-
                 <div class="event__type-item">
                   <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${type === 'drive' ? 'checked' : ''}>
                   <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
@@ -117,7 +114,7 @@ const createEventFormTemplate = (routePoint, formType) => {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice || ''}" placeholder="price">
+            <input class="event__input event__input--price" id="event-price-1" type="number" max="100000" name="event-price" value="${basePrice || ''}" placeholder="price">
           </div>
 
           ${formType === FormType.CREATE ? `
@@ -164,8 +161,10 @@ export default class CreateEditEventView extends AbstractStatefulView {
   #onSubmitButtonClick = null;
   #onDataChange = null;
   #formType = null;
+  #destinations = null;
+  #offersByType = null;
 
-  constructor(routePoint, onCloseEditButtonClick, onSubmitButtonClick, onDataChange, formType) {
+  constructor(routePoint, destinations, offers, onCloseEditButtonClick, onSubmitButtonClick, onDataChange, formType) {
     super();
     this._state = { ...routePoint };
     this.#onCloseEditButtonClick = onCloseEditButtonClick;
@@ -173,11 +172,14 @@ export default class CreateEditEventView extends AbstractStatefulView {
     this.#onDataChange = onDataChange;
     this.#formType = formType;
 
+    this.#destinations = destinations;
+    this.#offersByType = offers;
+
     this._restoreHandlers();
   }
 
   get template() {
-    return createEventFormTemplate(this._state, this.#formType);
+    return createEventFormTemplate(this._state, this.#destinations, this.#offersByType, this.#formType);
   }
 
   _restoreHandlers() {
@@ -200,13 +202,41 @@ export default class CreateEditEventView extends AbstractStatefulView {
     this.#setDatepickerEnd();
   }
 
+  #setDisableFormElements(state) {
+    this.element.querySelectorAll('input, select, button').forEach((element) => {
+      element.disabled = state;
+    });
+  }
+
+  setSaving() {
+    this.element.querySelector('.event__save-btn').textContent = 'Saving...';
+    this.#setDisableFormElements(true);
+  }
+
+  setDeleting() {
+    this.element.querySelector('.event__reset-btn').textContent = 'Deleting...';
+    this.#setDisableFormElements(true);
+  }
+
+  setAborting() {
+    const formElement = this.element.querySelector('form');
+    formElement.classList.add('shake');
+    this.#setDisableFormElements(false);
+    setTimeout(() => {
+      formElement.classList.remove('shake');
+    }, 600);
+    this.element.querySelector('.event__save-btn').textContent = 'Save';
+    this.element.querySelector('.event__reset-btn').textContent = 'Delete';
+  }
+
+
   getUpdatedPoint() {
     const formElement = this.element.querySelector('form');
     const formData = new FormData(formElement);
 
     const selectedType = formData.get('event-type');
     const selectedDestinationName = formData.get('event-destination');
-    const selectedDestination = destinations.find((dest) => dest.name === selectedDestinationName);
+    const selectedDestination = this.#destinations.find((dest) => dest.name === selectedDestinationName);
     const selectedOffers = Array.from(formElement.querySelectorAll('.event__offer-checkbox:checked'))
       .map((checkbox) => checkbox.id.replace('event-offer-', ''));
 
@@ -224,9 +254,19 @@ export default class CreateEditEventView extends AbstractStatefulView {
     };
   }
 
-  #deleteButtonClickHandler = (evt) => {
+  #deleteButtonClickHandler = async (evt) => {
     evt.preventDefault();
-    this.#onDataChange(UserAction.DELETE_POINT, UpdateType.MINOR, this._state);
+    this.setDeleting();
+
+    try {
+      await this.#onDataChange(
+        UserAction.DELETE_POINT,
+        UpdateType.MINOR,
+        this._state
+      );
+    } catch (error) {
+      this.setAborting();
+    }
   };
 
   #closeEditButtonClickHandler = (evt) => {
@@ -251,7 +291,7 @@ export default class CreateEditEventView extends AbstractStatefulView {
   #eventDestinationChangeHandler = (evt) => {
     evt.preventDefault();
     const targetDestination = evt.target.value.toLowerCase();
-    const newDestination = destinations.find((dest) => dest.name.toLowerCase() === targetDestination);
+    const newDestination = this.#destinations.find((dest) => dest.name.toLowerCase() === targetDestination);
     this.updateElement({
       destination: newDestination ? newDestination.id : ''
     });

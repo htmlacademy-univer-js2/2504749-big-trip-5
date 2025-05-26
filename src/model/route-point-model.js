@@ -1,10 +1,16 @@
-import { mockRoutePoints, offersByType, destinations } from '../mock/mock-route-data.js';
 import Observable from '../framework/observable.js';
+import { UpdateType } from '../const.js';
 
 export default class RoutePointsModel extends Observable {
-  #points = [...mockRoutePoints];
-  #allOffers = [...offersByType];
-  #allDestinations = [...destinations];
+  #points = [];
+  #allOffers = [];
+  #allDestinations = [];
+  #eventsApiService = null;
+
+  constructor(eventsApiService) {
+    super();
+    this.#eventsApiService = eventsApiService;
+  }
 
   get points() {
     this.#sortPointsByDate();
@@ -19,66 +25,90 @@ export default class RoutePointsModel extends Observable {
     return this.#allDestinations;
   }
 
-  setPoints(updateType, update) {
-    this.#points = [...update];
-    this.#sortPointsByDate();
-    this._notify(updateType, update);
-  }
+  async init() {
+    try {
+      const [points, offers, dests] = await Promise.all([
+        this.#eventsApiService.points,
+        this.#eventsApiService.offers,
+        this.#eventsApiService.destinations,
+      ]);
 
-  addPoint(updateType, update) {
-    if (
-      !update.type ||
-      !update.base_price ||
-      !update.date_from ||
-      !update.date_to ||
-      !update.destination
-    ) {
-      return;
+      this.#points = points;
+      this.#allOffers = offers;
+      this.#allDestinations = dests;
+
+      this._notify(UpdateType.INIT);
+    } catch (error) {
+      this.#points = [];
+      this.#allOffers = [];
+      this.#allDestinations = [];
+
+      this._notify(UpdateType.ERROR);
     }
-
-    this.#points = [
-      update,
-      ...this.#points,
-    ];
-
-    this.#sortPointsByDate();
-
-    this._notify(updateType, update);
   }
 
-  updatePoint(updateType, update) {
+  async addPoint(updateType, update) {
+    try {
+      const newPoint = await this.#eventsApiService.addPoint(update);
+
+      this.#points = [
+        newPoint,
+        ...this.#points
+      ];
+
+      this.#sortPointsByDate();
+
+      this._notify(updateType, newPoint);
+    } catch (error) {
+      throw new Error('Can\'t add Point');
+    }
+  }
+
+  async updatePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t update unexisting Point');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      update,
-      ...this.#points.slice(index + 1),
-    ];
+    try {
+      const updatedEvent = await this.#eventsApiService.updatePoint(update);
 
-    this.#sortPointsByDate();
+      this.#points = [
+        ...this.#points.slice(0, index),
+        updatedEvent,
+        ...this.#points.slice(index + 1),
+      ];
 
-    this._notify(updateType, update);
+      this.#sortPointsByDate();
+
+      this._notify(updateType, updatedEvent);
+    } catch (error) {
+      throw new Error('Can\'t update Point');
+    }
   }
 
-  deletePoint(updateType, update) {
+  async deletePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting Point');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1),
-    ];
+    try {
+      await this.#eventsApiService.deletePoint(update);
 
-    this.#sortPointsByDate();
+      this.#points = [
+        ...this.#points.slice(0, index),
+        ...this.#points.slice(index + 1),
+      ];
 
-    this._notify(updateType, update);
+      this.#sortPointsByDate();
+
+      this._notify(updateType, update);
+    } catch (error) {
+      throw new Error('Can\'t delete Point');
+    }
   }
 
   #sortPointsByDate() {
